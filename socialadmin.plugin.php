@@ -1,5 +1,5 @@
 <?php
-namespace Habari;
+//namespace Habari;
 
 class SocialAdmin extends Plugin
 {
@@ -88,6 +88,20 @@ class SocialAdmin extends Plugin
 			$html .= '<p><a href="' . $form->get_theme()->socialauth_link($service, array('state' => 'loginform')) . '">' . _t( 'Login with %s', array ( $service ), __CLASS__ ) . '</a></p>';
 		}
 		$form->append('static', 'socialadmin', $html);
+	}
+	
+	/*
+	 * Habari 0.9 style form editing, does the same as the above function
+	 */
+	public function action_theme_loginform_controls()
+	{
+		$services = Plugins::filter( 'socialauth_services', array() );
+		$html = '';
+		$theme = Themes::create();
+		foreach( $services as $service ) {
+			$html .= '<p><a href="' . $theme->socialauth_link($service, array('state' => 'loginform')) . '">' . _t( 'Login with %s', array ( $service ), __CLASS__ ) . '</a></p>';
+		}
+		echo $html;
 	}
 }
 ?>
