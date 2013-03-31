@@ -77,8 +77,8 @@ class SocialAdmin extends Plugin
 	}
 	
 	/**
-	 * function action_theme_loginform_controls
-	 * add a checkbox to the login screen to control our cookie
+	 * Add the redirect links for the services to the login form
+	 * 0.10 style with new FormUI
 	**/
 	public function action_form_login($form)
 	{
@@ -87,7 +87,7 @@ class SocialAdmin extends Plugin
 		foreach( $services as $service ) {
 			$html .= '<p><a href="' . $form->get_theme()->socialauth_link($service, array('state' => 'loginform')) . '">' . _t( 'Login with %s', array ( $service ), __CLASS__ ) . '</a></p>';
 		}
-		$form->append('static', 'socialadmin', $html);
+		$form->append(FormControlStatic::create('socialadmin', 'null:null'))->set_static($html);
 	}
 }
 ?>
