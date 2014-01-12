@@ -9,43 +9,25 @@ class SocialAdmin extends Plugin
 	* @param FormUI $form The form that is used on the User page
 	* @param Post $post The user being edited
 	**/
-	public function action_form_user( $form, $edit_user )
+	public function action_modify_form_edit_user( $form )
 	{
+		$edit_user = $form->settings['data']['edit_user'];
 		$services = Plugins::filter( 'socialauth_services', array() );
 		if( count($services) ) {
-			$socials = $form->append( 'wrapper', 'linked_socialnets_wrapper', 'Linked Social Nets');
-			$socials->class = 'container settings';
-			$socials->append( 'static', 'linked_socialnets', _t( '<h2>Linked Social Nets</h2>', __CLASS__ ) );
+			$socials = $form->append( 'wrapper', 'linked_socialnets_wrapper', 'Linked Social Networks' );
+			$socials->add_class( 'container main settings' );
+			$socials->append( FormControlStatic::create( 'linked_socialnets' )->set_static( _t( '<h2 class="lead">Linked Social Networks</h2>', __CLASS__ ) ) );
 			
 			foreach( $services as $service ) {
 				$fieldname = "servicelink_$service";
 				$fieldcaption = isset( $edit_user->info->{$fieldname} ) ? _t( 'Linked to %s account', array( $service ), __CLASS__ ) : '<a href="' . $form->get_theme()->socialauth_link( $service, array( 'state' => 'userinfo' ) ) . '">' . _t( 'Link %s account', array( $service ), __CLASS__ ) . '</a>';
-				$servicefield = $socials->append( 'text', $fieldname, 'null:null', $fieldcaption );
-				$servicefield->value = isset( $edit_user->info->{$fieldname} ) ? $edit_user->info->{$fieldname} : '';
-				$servicefield->class[] = 'item clear';
-				$servicefield->template = "optionscontrol_text";
+				$servicefield = $socials->append( 'text', $fieldname, $edit_user );
+				$servicefield->label( $fieldcaption );
+				$servicefield->set_value( isset( $edit_user->info->{$fieldname} ) ? $edit_user->info->{$fieldname} : '' );
 			}
-			
-			$form->move_after( $socials, $form->user_info );
-		}
-	}
-	
-	/**
-	 * Add the Additional User Fields to the list of valid field names.
-	 * This causes adminhandler to recognize the fields and
-	 * to set the userinfo record appropriately
-	**/
-	public function filter_adminhandler_post_user_fields( $fields )
-	{
-		$services = Plugins::filter( 'socialauth_services', array() );
-		if ( !is_array($services) || count( $services ) == 0 ) {
-			return;
-		}
 
-		foreach($services as $service) {
-			$fields[ $service ] = "servicelink_$service";
+			$form->move_after($socials, $form->user_info);
 		}
-		return $fields;
 	}
 	
 	/*
