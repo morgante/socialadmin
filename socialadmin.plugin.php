@@ -29,22 +29,62 @@ class SocialAdmin extends Plugin
 			$form->move_after($socials, $form->user_info);
 		}
 	}
+
+	/**
+	 * Filter for fetching a user from a particular service
+	 */
+	public function filter_socialauth_user( $service, $id )
+	{
+		$fieldname = "servicelink_$service";
+
+		$users = Users::get( array( 'info' => array( $fieldname => $id ) ) );
+
+		if ( count ( $users ) >= 1 ) {
+			// just return the first one
+			return $users[0];
+		} else {
+			return false;
+		}
+	}
 	
 	/*
 	 * Handle the result when a user identified himself
 	 */
 	public function action_socialauth_identified( $service, $userdata, $state = '' )
 	{
+		$fieldname = "servicelink_$service";
+
 		switch($state) {
+			case 'usercreate':
+				// make sure we don't already have one
+				$users = Users::get( array( 'info' => array( "servicelink_$service" => $userdata['id'] ) ) );
+
+				if ( count( $users ) < 1 ) {
+					// Generate a unique password
+					$password = UUID::get();
+
+					$user = new User( array(
+						'username' => $userdata['username'],
+						'email' => $userdata['email'],
+						'password' => Utils::crypt($password)
+					));
+
+					$user->info->{$fieldname} = $userdata['id'];
+					$user->info->displayname = $userdata['name'];
+					$user->info->imageurl = $userdata['portrait_url'];
+
+					$user->insert();
+				}
+
+				break;
 			case 'userinfo':
 				$user = User::identify();
-				$fieldname = "servicelink_$service";
 				$user->info->{$fieldname} = $userdata['id'];
 				$user->update();
 				Utils::redirect( URL::get( 'admin', array( 'page' => 'user', 'user' => $user->username ) ) );
 				break;
 			case 'loginform':
-				$users = Users::get( array( 'info' => array( "servicelink_$service" => $userdata['id'] ) ) );
+				$users = Users::get( array( 'info' => array( $fieldname => $userdata['id'] ) ) );
 				if( count( $users ) > 1 ) {
 					// TODO: Handle multiple linked accounts
 				}
