@@ -139,7 +139,7 @@ class SocialAdmin extends Plugin
 		$html = '';
 		$theme = Themes::create();
 		foreach( $services as $service ) {
-			$html .= '<p><a href="' . $theme->socialauth_link($service, array('state' => 'loginform')) . '">' . _t( 'Login with %s', array ( $service ), __CLASS__ ) . '</a></p>';
+			$html .= '<p class="social ' . $service . '"><a href="' . $theme->socialauth_link($service, array('state' => 'loginform')) . '">' . _t( 'Login with %s', array ( $service ), __CLASS__ ) . '</a></p>';
 		}
 		echo $html;
 	}
